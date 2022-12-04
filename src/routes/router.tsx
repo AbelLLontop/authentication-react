@@ -1,29 +1,47 @@
-// import App from '@/App';
-// import Home from '@/pages/Home';
-import Login from '@/pages/Login';
-import Products from '@/pages/Products';
-import PrivateRoutes from '@/utils/PrivateRoutes';
-import { lazy, Suspense } from 'react';
-import {createBrowserRouter} from 'react-router-dom';
+import { ProtectedRoute } from "@/components";
+import { lazy } from "react";
+import { createBrowserRouter } from "react-router-dom";
 
-const HomePage = lazy(()=>import('@/pages/Home'));
+import Layout from "@/pages/Layout";
+const LandingPage   = lazy(() => import("@/pages/Landing"));
+const HomePage      = lazy(() => import("@/pages/Home"));
+const DashboardPage = lazy(() => import("@/pages/Dashboard"));
+const AnalyticsPage = lazy(() => import("@/pages/Analytics"));
+const AdminPage     = lazy(() => import("@/pages/Admin"));
 
-export default createBrowserRouter([{
-    element: <PrivateRoutes />,
+export default createBrowserRouter([
+  {
+    path: "/",
+    element: <Layout />,
     children: [
-        {
-            path: '/',
-            element: <Suspense fallback={<div>Loading...</div>}><HomePage /></Suspense>,
-        },
-        {
-            path :'/products',
-            element: <Products />
-        }
-    ]
-},
-{
-    path: '/login',
-    element: <Login/>
-}])
-;
-
+      {
+        index: true,
+        element: <LandingPage />,
+      },
+      { path: "/landing", element: <LandingPage /> },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          { path: "/home", element: <HomePage /> },
+          { path: "/dashboard", element: <DashboardPage /> },
+        ],
+      },
+      {
+        path: "/analytics",
+        element: (
+          <ProtectedRoute redirectTo="/home" permission="analize">
+            <AnalyticsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin",
+        element: (
+          <ProtectedRoute redirectTo="/home" permission="admin">
+            <AdminPage />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+]);
